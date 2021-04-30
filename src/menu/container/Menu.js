@@ -35,20 +35,34 @@ const Menu = () => {
   const [entries, setEntries] = useState([]);
   const [status, setStatus] = useState(0);
 
+  const reBuildData = (data, url) => {
+    let array = [];
+    let obj;
+    for (const prop in data) {
+      obj = {
+        id: data[prop].id,
+        tittle: data[prop].title,
+        illustration: `${url}${data[prop].backdrop_path}`,
+      };
+      if (array.length <= data.length) {
+        array.push(obj);
+      }
+    }
+    console.log('array >>>', array);
+    return setEntries(array);
+  };
+
   const postPremieres = async () => {
-    const data = {
-      page: 1,
-    };
-    JSON.stringify(data);
     const token = await AsyncStorage.getItem('token');
     axios
-      .get(`${baseURL}/api/movies/now_playing`, data, {
+      .get(`${baseURL}/api/movies/now_playing`, {
         headers: {
-          'Authorization': `Basic ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       })
       .then(resp => {
-        console.log('resp >>>', resp);
+        const {data} = resp;
+        reBuildData(data.data, data.imageBaseUrl);
       })
       .catch(error => {
         console.log('error >>>', error.response);
@@ -66,6 +80,7 @@ const Menu = () => {
         const {data, status} = resp;
         setStatus(status);
         AsyncStorage.setItem('token', data.data.payload.token);
+        postPremieres();
       })
       .catch(error => {
         console.log('error >>>', error.response);
@@ -74,8 +89,6 @@ const Menu = () => {
 
   useEffect(() => {
     postRefreshSesion();
-    postPremieres();
-    setEntries(ENTRIES1);
   }, [entries]);
 
   return (

@@ -79,7 +79,7 @@ const ListMovie = () => {
   return (
     <View style={styles.container_list}>
       <FlatList
-        vertical
+        showsVerticalScrollIndicator
         keyExtractor={keyExtractor()}
         data={list}
         renderItem={renderList}
